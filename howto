@@ -1,0 +1,2 @@
+mongod --fork --logpath /data/db/mongod.log
+python shootpanel.py 
