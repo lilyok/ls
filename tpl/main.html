@@ -30,51 +30,18 @@
           document.getElementById('http_count').innerHTML=arg.http_diff;
         }
       });
-    }, 5000);
+    }, 500);
   </script>
-  
 
-  <div class="navbar-xs">
-    <div class="navbar-primary">
-      <div class="bs-example bs-navbar-top-example" data-example-id="navbar-fixed-to-top">
-        <nav class="navbar navbar-default navbar-fixed-top navbar-inverse">
-          <div class="container-fluid">
-            <div class="navbar-header">
-              <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-6">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-              </button>
-              <a class="navbar-brand" href="#">Lil Helper</a>
-            </div>
-
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-6">
-              <ul class="nav navbar-nav">
-                <li class="active"><a href="#">B2B</a></li>
-                <li><a href="/cc">CrossCheck</a></li>
-                <li><a href="/newlog">RTMR+TSKV</a></li>
-              </ul>
-            </div>
-          </div>
-        </nav>
-      </div>
-    </div>
-  </div>
+  {% include "mainmenu.html" %}
 
   <div class="lilpage container">
     <header class="headertext" id="overview">
       <h4>Инструменты запуска отстрела</h4>
       <h5>Default-настройки для этапа0, их можно кастомизировать</h5>
-      {% if 'test' in last_config %}
-      <h6>{{ last_config['status'] }}</h6>
-      <li>Команда: {{ last_config['command'] }} </li>
-      <li>Pre: {{ last_config['pre'] }} </li>
-      <li>Test: {{ last_config['test'] }} </li>
-      {% else %}
-      <h6>{{ last_config['status'] }}</h6>
-      <li>{{ last_config['text'] }} </li>
-      {% end %}  
+      {% for key in last_config %}
+      <li>{{ key }}: {{ last_config[key] }}</li>
+      {% end %} 
     </header>
     <div class="row vertical-divider" style="margin-top: 30px">
       <div class="col-xs-9">
@@ -90,57 +57,71 @@
           </ul>
           <div class="tab-content">
             <div class="tab-pane active" id="search">
-              <p>Я search.dsdfsdcdsvdvdv dsvsdvsdvdsvdsvsvdvvsvsvsvdvsvsdvdsvdsvdsvv sdvdsvsd svsdvdsvsvvdsvvvsdvsvsdvvsd</p>
+              {% include "param.html" %}
+              <div class="col-lg-2">
+                <label type="button" class="btn btn-default"  id="searchShoot"><!-- active -->
+                  <span class="glyphicon glyphicon-play-circle" ></span>
+                  Запустить
+                </label>
+
+              </div> 
             </div>
             <div class="tab-pane" id="partner">
-              <p>Хей, partner.</p>
+              {% include "param.html" %}
+               <div class="col-lg-2">
+                <label type="button" class="btn btn-default"  id="partnerShoot"><!-- active -->
+                  <span class="glyphicon glyphicon-play-circle" ></span>
+                  Запустить
+                </label>            
+              </div>
             </div>
             <div class="tab-pane" id="rtb">
-              <p>Я 3-я rtb.</p>
+              {% include "param.html" %}
             </div>
             <div class="tab-pane" id="bsrank">
-              <p>Я 1-я bsrank.</p>
+              {% include "param.html" %}
             </div>
             <div class="tab-pane" id="metrika">
-              <p>Хей, я 2-я metrika.</p>
+              {% include "param.html" %}
             </div>
             <div class="tab-pane" id="bigb">
-              <p>Я 3-я bigb.</p>
+              {% include "param.html" %}
             </div>     
             <div class="tab-pane" id="turl">
-              <p>Я 3-я turl.</p>
+              {% include "param.html" %}
             </div>           
           </div>
         </div>
       </div>
-      <div class="col-xs-3">
-        <div class="panel panel-default">
-
-          <div class="panel-heading">Состояние mongodb</div>
-          <div class="panel-body">
-
-            <table class="table-condensed">
-              <thead>
-                <tr>
-                  <th>Команда</th>
-                  <th>Результат</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>response_log.count()</td>
-                  <td id="resp_count">{{ resp_count }}</td>
-                </tr>
-                <tr>
-                  <td>http_diff.count()</td>
-                  <td id="http_count">{{ http_count }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+      {% include "statusmongo.html" %}
     </div>
   </div>
+
+  <script>
+    function sendParams(e, role, count, isDebug, isPageCode) {
+        e.preventDefault();
+        $.ajax({
+            type: 'POST',
+            url: "/run",
+            data: { 
+              role: role,
+              shootCount: count, 
+              isDebug: isDebug, 
+              isPageCode: isPageCode},
+            success: function (data) {
+                return false
+            }
+        });      
+    }
+
+    $("#searchShoot").click(function (e) {
+      sendParams(e, "yabs", $("#shootCount").val(), $("#isDebug").is(':checked'),  $("#isPageCode").is(':checked'))
+        e.preventDefault();
+    });
+    $("#partnerShoot").click(function (e) {
+      sendParams(e, "bs", $("#shootCount").val(), $("#isDebug").is(':checked'),  $("#isPageCode").is(':checked'))
+        e.preventDefault();
+    });    
+  </script>  
 </body>
 </html>

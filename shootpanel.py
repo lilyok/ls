@@ -11,26 +11,40 @@ import zlib
 import json
 import yaml
 
-connection = pymongo.MongoClient("localhost", 27017) 
-db = connection.b2b
+try:
+    connection = pymongo.MongoClient("localhost", 27017) 
+    db = connection.b2b
+except Exception:
+    db = None
 #from qabs.common.yabs_utils import prepare_http_request
 #from qabs.common.cannon import Cannon
 
 
+class ShootHandler(tornado.web.RequestHandler):
+    def post(self):
+        print "khjghj"
+        print self.get_argument('shootCount', '')
+        print self.get_argument('isDebug', '')
+        print self.get_argument('isPageCode', '')
+
+
+
 class MongoHandler(tornado.web.RequestHandler):
     def get(self):
-        self.write({'response_log': db.response_log.count(), 'http_diff': db.http_diff.count()})
+        self.write({'response_log': db.response_log.count() if db else -1, 'http_diff': db.http_diff.count() if db else -1})
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
         try:
             try:
                 with open("last.config", 'r') as f:
-                    last_config = yaml.load(f)
-                    last_config['status'] = 'Предыдущий конфиг найден, использовались значения:'
+                    last_config = {}
+                    last_config = json.load(f)
+                    last_config['status'] = 'Предыдущий конфиг найден, значения загружены'
             except EnvironmentError: # parent of IOError, OSError *and* WindowsError where available   
-                last_config = {'status': 'Предыдущий конфиг отсутствует', 'text': 'Текущие настройки сохранятся в момент отстрела'}
-            self.render("main.html", last_config=last_config, resp_count=db.response_log.count(), http_count=db.http_diff.count())
+                last_config = {'status': 'Предыдущий конфиг отсутствует', 'warning': 'Текущие настройки сохранятся в момент отстрела'}
+            self.render("main.html", last_config=last_config, resp_count=db.response_log.count() if db else -1, 
+                http_count=db.http_diff.count() if db else -1)
 
         except Exception as e:
             print e
@@ -52,10 +66,11 @@ class NewLogsHandler(tornado.web.RequestHandler):
 class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
-            (r"/", MainHandler),
+            (r"/b2b", MainHandler),
             (r"/cc", CrossCheckHandler),
             (r"/newlog", NewLogsHandler),
             (r"/mongo_count", MongoHandler),
+            (r"/run", ShootHandler),
 
             # Add more paths here
         ]
