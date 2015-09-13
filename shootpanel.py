@@ -37,12 +37,12 @@ class MainHandler(tornado.web.RequestHandler):
     def get(self):
         try:
             try:
-                with open("last.config", 'r') as f:
+                with open("set.conf", 'r') as f:
                     last_config = {}
-                    last_config = json.load(f)
+                    last_config = yaml.load(f)
                     last_config['status'] = 'Предыдущий конфиг найден, значения загружены'
             except EnvironmentError: # parent of IOError, OSError *and* WindowsError where available   
-                last_config = {'status': 'Предыдущий конфиг отсутствует', 'warning': 'Текущие настройки сохранятся в момент отстрела'}
+                last_config = {'status': 'Предыдущий конфиг отсутствует, текущие настройки сохранятся в момент отстрела'}
             self.render("main.html", last_config=last_config, resp_count=db.response_log.count() if db else -1, 
                 http_count=db.http_diff.count() if db else -1)
 

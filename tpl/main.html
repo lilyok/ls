@@ -33,95 +33,42 @@
     }, 500);
   </script>
 
+
+<div class="lilpage container">
+  <header class="headertext" id="overview">
+    <h4>Инструменты запуска отстрела</h4>
+    <h5>Default-настройки для этапа0 находятся в set.conf</h5>
+    <h5>их можно кастомизировать, изменения сохранятся в custom.conf</h5>
+  </header>
+
   {% include "mainmenu.html" %}
 
-  <div class="lilpage container">
-    <header class="headertext" id="overview">
-      <h4>Инструменты запуска отстрела</h4>
-      <h5>Default-настройки для этапа0, их можно кастомизировать</h5>
-      {% for key in last_config %}
-      <li>{{ key }}: {{ last_config[key] }}</li>
-      {% end %} 
-    </header>
-    <div class="row vertical-divider" style="margin-top: 30px">
-      <div class="col-xs-9">
-        <div class="tabbable tabs-left">
-          <ul class="nav nav-tabs">
-            <li class="active"><a href="#search" data-toggle="tab">Поиск</a></li>
-            <li><a href="#partner" data-toggle="tab">Партнер</a></li>
-            <li><a href="#rtb" data-toggle="tab">РТБ</a></li>
-            <li><a href="#bsrank" data-toggle="tab">Торги</a></li>
-            <li><a href="#metrika" data-toggle="tab">Метрика</a></li>  
-            <li><a href="#bigb" data-toggle="tab">БигБ</a></li>
-            <li><a href="#turl" data-toggle="tab">Турл</a></li>           
-          </ul>
-          <div class="tab-content">
-            <div class="tab-pane active" id="search">
-              {% include "param.html" %}
-              <div class="col-lg-2">
-                <label type="button" class="btn btn-default"  id="searchShoot"><!-- active -->
-                  <span class="glyphicon glyphicon-play-circle" ></span>
-                  Запустить
-                </label>
-
-              </div> 
-            </div>
-            <div class="tab-pane" id="partner">
-              {% include "param.html" %}
-               <div class="col-lg-2">
-                <label type="button" class="btn btn-default"  id="partnerShoot"><!-- active -->
-                  <span class="glyphicon glyphicon-play-circle" ></span>
-                  Запустить
-                </label>            
-              </div>
-            </div>
-            <div class="tab-pane" id="rtb">
-              {% include "param.html" %}
-            </div>
-            <div class="tab-pane" id="bsrank">
-              {% include "param.html" %}
-            </div>
-            <div class="tab-pane" id="metrika">
-              {% include "param.html" %}
-            </div>
-            <div class="tab-pane" id="bigb">
-              {% include "param.html" %}
-            </div>     
-            <div class="tab-pane" id="turl">
-              {% include "param.html" %}
-            </div>           
+  {% include "statusmongo.html" %}
+  <div class="col-lg-12">
+    <div class="col-lg-12">
+      <h4>Status : {{ last_config['status'] }}</h4>
+    </div>
+    <div class="input-group col-lg-3">
+      <span class="input-group-addon">FUNC(0 - Smoke) :</span>
+      <input type="number" id="func" min="0" max="4" step="1" value={{ last_config['func'] }} data-bind="value:func" class="form-control input-sm"/>
+    </div>
+    {% for role in last_config %}
+      {% if role not in ['status', 'warning', 'func'] %}
+        <h4><input type="checkbox" id={{ role }} checked> {{ role }}</h4> <h5>{{ last_config[role] }}</h5>
+        <a href="#spoiler_{{ role }}" data-toggle="collapse" class="btn btn-primary">Настройки</a>
+        <div class="collapse" id=spoiler_{{ role }}>
+          <div class="input-group col-lg-12 well">
+              {%  set i=0 %}
+              {% for case in last_config[role] %}
+                {% include "param.html" %} 
+              {% end %}
           </div>
         </div>
-      </div>
-      {% include "statusmongo.html" %}
-    </div>
-  </div>
 
-  <script>
-    function sendParams(e, role, count, isDebug, isPageCode) {
-        e.preventDefault();
-        $.ajax({
-            type: 'POST',
-            url: "/run",
-            data: { 
-              role: role,
-              shootCount: count, 
-              isDebug: isDebug, 
-              isPageCode: isPageCode},
-            success: function (data) {
-                return false
-            }
-        });      
-    }
+      {% end %} 
+    {% end %} 
+  </div>  
+</div>
 
-    $("#searchShoot").click(function (e) {
-      sendParams(e, "yabs", $("#shootCount").val(), $("#isDebug").is(':checked'),  $("#isPageCode").is(':checked'))
-        e.preventDefault();
-    });
-    $("#partnerShoot").click(function (e) {
-      sendParams(e, "bs", $("#shootCount").val(), $("#isDebug").is(':checked'),  $("#isPageCode").is(':checked'))
-        e.preventDefault();
-    });    
-  </script>  
 </body>
 </html>

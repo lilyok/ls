@@ -1,20 +1,51 @@
-<div class="col-lg-3">
-  <div class="input-group">
-    <input type="number" id="shootCount" min="0" step="1" data-bind="value:shootCount" class="form-control"/>
-    <span class="input-group-addon">запросов</span>
-  </div>
-</div>
-<div class="col-lg-3">
-  <div class="checkbox">
-    <label>
-      <input type="checkbox" id="isDebug"> Дебажная кука
-    </label>
-  </div>
-</div>
-<div class="col-lg-2">
-  <div class="checkbox">
-    <label>
-      <input type="checkbox" id="isPageCode"> /page /code
-    </label>
-  </div>
-</div> 
+{% for properties in case %}
+ <div class="col-lg-12">
+   <h5>
+     {{ properties }}:
+   </h5>  
+   
+   {% for key in case[properties] %}
+      <label>{{ key }}</label>
+      {% if key == 'ignore_conf' %}
+        <div class="input-group col-lg-12">
+          <span class="input-group-addon">Игнорируемые поля при сравнении логов :</span>
+          <input type="text" id='{{ role }}_{{ key }}' value={{ case[properties][key] }} data-bind="value:{{ role }}_{{ key }}" class="form-control input-sm"/>
+        </div>
+      {% elif key == 'limit' %}
+        <div class="input-group col-lg-4">
+          <span class="input-group-addon">Количество тестов :</span>
+          <input type="number" id='{{ role }}_{{ key }}' min="0" max="1000000" step="1000" value={{ case[properties][key] }} data-bind="value:{{ role }}_{{ key }}" class="form-control input-sm"/>
+        </div>
+      {% elif key == 'stand' %}
+        <div class="input-group col-lg-3">
+          <span class="input-group-addon">Номер стенда(0 - Smoke) :</span>
+          <input type="number" id='{{ role }}_{{ key }}' min="0" max="4" step="1" value={{ case[properties][key] }} data-bind="value:{{ role }}_{{ key }}" class="form-control input-sm"/>
+        </div>
+      {% elif key == 'debug_cookie' %}
+        <div class="input-group col-lg-1">
+      <span class="input-group-addon">
+        <input type="checkbox" id='{{ role }}_{{ key }}' {% if case[properties][key]==True %} checked {% end %}>
+      </span>
+          <span class="input-group-addon">Дебажная кука</span>
+        </div>
+      {% else %}
+        <label>unknown key</label>
+      {% end %}
+   {% end %} 
+ </div>  
+
+{%  set i= i + 1 %}
+<li class="dropdown open">
+  <a id="drop_{{ role }}_{{ properties }}" role="button" data-toggle="dropdown" href="#">Добавить свойства {{ i }}<b class="caret"></b></a>
+  <ul id="menu1" class="dropdown-menu" role="menu" aria-labelledby="drop4">
+    <li role="presentation"><a role="menuitem" tabindex="-1" href="http://bootstrap-ru.ru" target="_blank">Действие</a></li>
+    <li role="presentation"><a role="menuitem" tabindex="-1" href="http://bootstrap-ru.ru" target="_blank">Другое действие</a></li>
+    <li role="presentation"><a role="menuitem" tabindex="-1" href="http://bootstrap-ru.ru" target="_blank">Здесь еще что-то</a></li>
+    <li role="presentation" class="divider"></li>
+    <li role="presentation"><a role="menuitem" tabindex="-1" href="http://bootstrap-ru.ru" target="_blank">Отдельная ссылка</a></li>
+  </ul>
+</li>
+
+{% end %} 
+
+      
