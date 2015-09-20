@@ -1,5 +1,5 @@
 {% for properties in case %}
-<div class="col-lg-12 conf_{{ role }}_{{ properties }}_{{ i }}">
+<div class="conf_{{ role }}_{{ properties }}_{{ i }}">
  <h5>
    {{ properties }}:
  </h5>  
@@ -7,22 +7,26 @@
  {% for key in case[properties] %}
  <label>{{ key }}</label>
  {% if key == 'ignore_conf' %}
- <div class="input-group col-lg-12">
+ <div class="input-group col-lg-12 {{ role }}_{{ properties }}_{{ i }}_{{ key }}" id="123">
   <span class="input-group-addon">{{ run_fields[key] }}</span>
   <input type="text" id='{{ role }}_{{ key }}_{{ i }}' value={{ case[properties][key] }} data-bind="value:{{ role }}_{{ key }}" class="form-control input-sm"/>
+        <span class="input-group-btn">
+        <button class="btn btn-default" type="button" onclick='delete_field("{{ role }}_{{ properties }}_{{ i }}_{{ key }}")'>Удалить</button>
+      </span>
 </div>
+
 {% elif key == 'limit' %}
-<div class="input-group col-lg-4">
+<div class="input-group col-lg-4 {{ role }}_{{ properties }}_{{ i }}_{{ key }}">
   <span class="input-group-addon">{{ run_fields[key] }}</span>
   <input type="number" id='{{ role }}_{{ key }}_{{ i }}' min="0" max="1000000" step="1000" value={{ case[properties][key] }} data-bind="value:{{ role }}_{{ key }}" class="form-control input-sm"/>
 </div>
 {% elif key == 'stand' %}
-<div class="input-group col-lg-3">
+<div class="input-group col-lg-3 {{ role }}_{{ properties }}_{{ i }}_{{ key }}">
   <span class="input-group-addon">{{ run_fields[key] }}</span>
   <input type="number" id='{{ role }}_{{ key }}_{{ i }}' min="0" max="4" step="1" value={{ case[properties][key] }} data-bind="value:{{ role }}_{{ key }}" class="form-control input-sm"/>
 </div>
 {% elif key == 'debug_cookie' %}
-<div class="input-group col-lg-1">
+<div class="input-group col-lg-1 {{ role }}_{{ properties }}_{{ i }}_{{ key }}">
   <span class="input-group-addon">
     <input type="checkbox" id='{{ role }}_{{ key }}_{{ i }}' {% if case[properties][key]==True %} checked {% end %}>
   </span>
@@ -33,6 +37,7 @@
 {% end %}
 {% end %} 
 </div>  
+
 
 <li class="dropdown open">
   <a id="drop_{{ role }}_{{ properties }}_{{ i }}" role="button" data-toggle="dropdown" href="#">
@@ -59,15 +64,15 @@
 
 
         {% end %}
-        $('.col-lg-12 .conf_{{ role }}_{{ properties }}_{{ i }}').append(field);
+        $('.conf_{{ role }}_{{ properties }}_{{ i }}').append(field);
       }
 
       $("#drop_{{ role }}_{{ properties }}_{{ i }}").click(function () {
         if(( ($('.addButton_{{ role }}_{{ properties }}_{{ i }}_{{ item }}').length) == 0) &&
-          (($('.input-group .col-lg-12 .{{ role }}_{{ properties }}_{{ i }}_{{ item }}').length) == 0)) {
+          (($('.input-group .{{ role }}_{{ properties }}_{{ i }}_{{ item }}').length) == 0)) {
           showitem='<li role="presentation"><a role="menuitem" tabindex="-1" href-"#" id="addButton_{{ role }}_{{ properties }}_{{ i }}_{{ item }}" class="addButton_{{ role }}_{{ properties }}_{{ i }}_{{ item }}" onclick="addButton_{{ role }}_{{ properties }}_{{ i }}_{{ item }}()">{{ run_fields[item] }}</a></li>'
         $('.item_{{ role }}_{{ properties }}_{{ i }}').append(showitem);
-      } else if (($('.input-group .col-lg-12 .{{ role }}_{{ properties }}_{{ i }}_{{ item }}').length) > 0){
+      } else if (($('.input-group .{{ role }}_{{ properties }}_{{ i }}_{{ item }}').length) > 0){
         $('#addButton_{{ role }}_{{ properties }}_{{ i }}_{{ item }}').remove();
       }
     });
