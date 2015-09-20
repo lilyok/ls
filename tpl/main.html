@@ -44,6 +44,9 @@
   {% include "mainmenu.html" %}
 
   {% include "statusmongo.html" %}
+
+  {% set run_fields= {'ignore_conf':'Игнорируемые поля при сравнении логов','limit':'Количество тестов','stand':'Номер стенда(0 - Smoke)','debug_cookie':'Дебажная кука', 'add_options':'Дополнительные опции отстрела'} %}
+
   <div class="col-lg-12">
     <div class="col-lg-12">
       <h4>Status : {{ last_config['status'] }}</h4>
@@ -69,6 +72,7 @@
     {% end %} 
   </div>  
 </div>
+
 
 </body>
 </html>

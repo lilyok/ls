@@ -1,51 +1,80 @@
 {% for properties in case %}
- <div class="col-lg-12">
-   <h5>
-     {{ properties }}:
-   </h5>  
-   
-   {% for key in case[properties] %}
-      <label>{{ key }}</label>
-      {% if key == 'ignore_conf' %}
-        <div class="input-group col-lg-12">
-          <span class="input-group-addon">Игнорируемые поля при сравнении логов :</span>
-          <input type="text" id='{{ role }}_{{ key }}' value={{ case[properties][key] }} data-bind="value:{{ role }}_{{ key }}" class="form-control input-sm"/>
-        </div>
-      {% elif key == 'limit' %}
-        <div class="input-group col-lg-4">
-          <span class="input-group-addon">Количество тестов :</span>
-          <input type="number" id='{{ role }}_{{ key }}' min="0" max="1000000" step="1000" value={{ case[properties][key] }} data-bind="value:{{ role }}_{{ key }}" class="form-control input-sm"/>
-        </div>
-      {% elif key == 'stand' %}
-        <div class="input-group col-lg-3">
-          <span class="input-group-addon">Номер стенда(0 - Smoke) :</span>
-          <input type="number" id='{{ role }}_{{ key }}' min="0" max="4" step="1" value={{ case[properties][key] }} data-bind="value:{{ role }}_{{ key }}" class="form-control input-sm"/>
-        </div>
-      {% elif key == 'debug_cookie' %}
-        <div class="input-group col-lg-1">
-      <span class="input-group-addon">
-        <input type="checkbox" id='{{ role }}_{{ key }}' {% if case[properties][key]==True %} checked {% end %}>
-      </span>
-          <span class="input-group-addon">Дебажная кука</span>
-        </div>
-      {% else %}
-        <label>unknown key</label>
-      {% end %}
-   {% end %} 
- </div>  
+<div class="col-lg-12 conf_{{ role }}_{{ properties }}_{{ i }}">
+ <h5>
+   {{ properties }}:
+ </h5>  
 
-{%  set i= i + 1 %}
+ {% for key in case[properties] %}
+ <label>{{ key }}</label>
+ {% if key == 'ignore_conf' %}
+ <div class="input-group col-lg-12">
+  <span class="input-group-addon">{{ run_fields[key] }}</span>
+  <input type="text" id='{{ role }}_{{ key }}_{{ i }}' value={{ case[properties][key] }} data-bind="value:{{ role }}_{{ key }}" class="form-control input-sm"/>
+</div>
+{% elif key == 'limit' %}
+<div class="input-group col-lg-4">
+  <span class="input-group-addon">{{ run_fields[key] }}</span>
+  <input type="number" id='{{ role }}_{{ key }}_{{ i }}' min="0" max="1000000" step="1000" value={{ case[properties][key] }} data-bind="value:{{ role }}_{{ key }}" class="form-control input-sm"/>
+</div>
+{% elif key == 'stand' %}
+<div class="input-group col-lg-3">
+  <span class="input-group-addon">{{ run_fields[key] }}</span>
+  <input type="number" id='{{ role }}_{{ key }}_{{ i }}' min="0" max="4" step="1" value={{ case[properties][key] }} data-bind="value:{{ role }}_{{ key }}" class="form-control input-sm"/>
+</div>
+{% elif key == 'debug_cookie' %}
+<div class="input-group col-lg-1">
+  <span class="input-group-addon">
+    <input type="checkbox" id='{{ role }}_{{ key }}_{{ i }}' {% if case[properties][key]==True %} checked {% end %}>
+  </span>
+  <span class="input-group-addon">{{ run_fields[key] }}</span>
+</div>
+{% else %}
+<label>unknown key</label>
+{% end %}
+{% end %} 
+</div>  
+
 <li class="dropdown open">
-  <a id="drop_{{ role }}_{{ properties }}" role="button" data-toggle="dropdown" href="#">Добавить свойства {{ i }}<b class="caret"></b></a>
-  <ul id="menu1" class="dropdown-menu" role="menu" aria-labelledby="drop4">
-    <li role="presentation"><a role="menuitem" tabindex="-1" href="http://bootstrap-ru.ru" target="_blank">Действие</a></li>
-    <li role="presentation"><a role="menuitem" tabindex="-1" href="http://bootstrap-ru.ru" target="_blank">Другое действие</a></li>
-    <li role="presentation"><a role="menuitem" tabindex="-1" href="http://bootstrap-ru.ru" target="_blank">Здесь еще что-то</a></li>
-    <li role="presentation" class="divider"></li>
-    <li role="presentation"><a role="menuitem" tabindex="-1" href="http://bootstrap-ru.ru" target="_blank">Отдельная ссылка</a></li>
+  <a id="drop_{{ role }}_{{ properties }}_{{ i }}" role="button" data-toggle="dropdown" href="#">
+    {% if properties == 'rerun' %} Добавить отличные от отстрела свойства {% else %} Добавить свойства {% end %} 
+    <b class="caret"></b></a>
+    <ul id="menu_{{ role }}_{{ properties }}_{{ i }}" class="dropdown-menu {{ role }}_{{ properties }}_{{ i }}" role="menu" aria-labelledby="drop_{{ role }}_{{ properties }}_{{ i }}">
+     <div class="item_{{ role }}_{{ properties }}_{{ i }}">
+     </div>
+     {% for item in run_fields %}
+     <script>
+      function addButton_{{ role }}_{{ properties }}_{{ i }}_{{ item }}() {
+
+        var field = '<label>unknown item</label>'
+        {% if item == 'ignore_conf' %}  
+        field ='<div class="input-group col-lg-12 {{ role }}_{{ properties }}_{{ i }}_{{ item }}"><span class="input-group-addon">{{ run_fields[item] }}</span><input type="text" id="{{ role }}_{{ item }}_{{ i }}" value="{{ last_config[role][0]["run"][item] }}" data-bind="value:{{ role }}_{{ item }}" class="form-control input-sm"/></div>'
+        {% elif item == 'limit' %}
+          field = '<div class="input-group col-lg-4 {{ role }}_{{ properties }}_{{ i }}_{{ item }}"><span class="input-group-addon">{{ run_fields[item] }}</span><input type="number" id="{{ role }}_{{ item }}_{{ i }}" min="0" max="1000000" step="1000" value={{ last_config[role][0]["run"][item] }} data-bind="value:{{ role }}_{{ item }}" class="form-control input-sm"/></div>'
+        {% elif item == 'stand' %}
+          field = '<div class="input-group col-lg-3 {{ role }}_{{ properties }}_{{ i }}_{{ item }}"><span class="input-group-addon">{{ run_fields[item] }}</span><input type="number" id="{{ role }}_{{ item }}_{{ i }}" min="0" max="4" step="1" value{{ last_config[role][0]["run"][item] }} data-bind="value:{{ role }}_{{ item }}" class="form-control input-sm"/></div>'
+        {% elif item == 'debug_cookie' %}
+          {% set is_debug = ("{{ last_config[role][0]['run'][item] }}").lower() %}
+
+          field = '<div class="input-group col-lg-1 {{ role }}_{{ properties }}_{{ i }}_{{ item }}"><span class="input-group-addon"><input type="checkbox" id="{{ role }}_{{ item }}_{{ i }}" {% if is_debug == "true" %} checked {% end %}></span><span class="input-group-addon">{{ run_fields[item] }}</span></div>'
+
+
+        {% end %}
+        $('.col-lg-12 .conf_{{ role }}_{{ properties }}_{{ i }}').append(field);
+      }
+
+      $("#drop_{{ role }}_{{ properties }}_{{ i }}").click(function () {
+        if(( ($('.addButton_{{ role }}_{{ properties }}_{{ i }}_{{ item }}').length) == 0) &&
+          (($('.input-group .col-lg-12 .{{ role }}_{{ properties }}_{{ i }}_{{ item }}').length) == 0)) {
+          showitem='<li role="presentation"><a role="menuitem" tabindex="-1" href-"#" id="addButton_{{ role }}_{{ properties }}_{{ i }}_{{ item }}" class="addButton_{{ role }}_{{ properties }}_{{ i }}_{{ item }}" onclick="addButton_{{ role }}_{{ properties }}_{{ i }}_{{ item }}()">{{ run_fields[item] }}</a></li>'
+        $('.item_{{ role }}_{{ properties }}_{{ i }}').append(showitem);
+      } else if (($('.input-group .col-lg-12 .{{ role }}_{{ properties }}_{{ i }}_{{ item }}').length) > 0){
+        $('#addButton_{{ role }}_{{ properties }}_{{ i }}_{{ item }}').remove();
+      }
+    });
+    </script>
+    {% end %}
   </ul>
 </li>
+{%  set i= i + 1 %}
 
 {% end %} 
-
-      
