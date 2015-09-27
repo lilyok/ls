@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+__author__ = 'lilil'
 import tornado.ioloop
 import tornado.web
 from tornado import template
