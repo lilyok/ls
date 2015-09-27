@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+{% set run_fields= {'ignore_conf':'Игнорируемые поля при сравнении логов','limit':'Количество тестов','stand':'Номер стенда(0 - Smoke; -1 - Cloud)','debug_cookie':'Дебажная кука', 'add_options':'Дополнительные опции отстрела'} %}
+{% set roles=['yabs','bs','rtb','bsrank'] %}
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -17,6 +19,7 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
   <!-- Include all compiled plugins (below), or include individual files as needed -->
   <script src="../static/js/bootstrap.min.js"></script>
+  <script src="../static/js/main.js"></script>
 
   <script> 
     setInterval(function()
@@ -28,6 +31,7 @@
         success: function(arg){
           document.getElementById('resp_count').innerHTML=arg.response_log;
           document.getElementById('http_count').innerHTML=arg.http_diff;
+          document.getElementById('reports').innerHTML=arg.reports;
         }
       });
     }, 500);
@@ -38,46 +42,121 @@
 <div class="lilpage container">
   <header class="headertext" id="overview">
     <h4>Инструменты запуска отстрела</h4>
-    <h5>Default-настройки для этапа0 находятся в set.conf</h5>
+    <h5>Default-настройки для этапа0 находятся в default.conf</h5>
     <h5>их можно кастомизировать, изменения сохранятся в custom.conf</h5>
   </header>
 
   {% include "mainmenu.html" %}
 
   {% include "statusmongo.html" %}
-
-  {% set run_fields= {'ignore_conf':'Игнорируемые поля при сравнении логов','limit':'Количество тестов','stand':'Номер стенда(0 - Smoke)','debug_cookie':'Дебажная кука', 'add_options':'Дополнительные опции отстрела'} %}
+  
+  <label type="button" class="btn btn-default"  id="runPlan"><!-- active -->
+    <span class="glyphicon glyphicon-play-circle" ></span>
+    Запустить
+  </label>
+  
 
   <div class="col-lg-12">
     <div class="col-lg-12">
       <h4>Status : {{ last_config['status'] }}</h4>
     </div>
     <div class="input-group col-lg-3">
-      <span class="input-group-addon">FUNC(0 - Smoke) :</span>
-      <input type="number" id="func" min="0" max="4" step="1" value={{ last_config['func'] }} data-bind="value:func" class="form-control input-sm"/>
+      <span class="input-group-addon">FUNC(0 - Smoke; -1 - Cloud) :</span>
+      {% if last_config['func'] == 'smoke' %}
+        {% set last_config['func'] = '0' %}
+      {% elif last_config['func'] == 'cloud' %}
+        {% set last_config['func'] = '-1' %}
+      {% end %}
+      <input type="number" id="func" min="-1" max="4" 
+      step="1" value={{ last_config['func'] }} data-bind="value:func" class="form-control input-sm"/>
     </div>
     {% for role in last_config %}
       {% if role not in ['status', 'warning', 'func'] %}
         <h4><input type="checkbox" id={{ role }} checked> {{ role }}</h4> <h5>{{ last_config[role] }}</h5>
         <a href="#spoiler_{{ role }}" data-toggle="collapse" class="btn btn-primary">Настройки</a>
         <div class="collapse" id=spoiler_{{ role }}>
-          <div class="input-group col-lg-12 well">
+          <div class="input-group col-lg-12 well spoiler_{{ role }}">
               {%  set i=0 %}
               {% for case in last_config[role] %}
                 {% include "param.html" %} 
               {% end %}
           </div>
-        </div>
+        
 
+        <label type="button" class="btn btn-default"  id="addReRun_{{ role }}"><!-- active -->
+        <span class="glyphicon glyphicon-play-circle" ></span>
+         Добавить перестрел
+        </label>
+        <script>
+        $("#addReRun_{{ role }}").click(function (e) {
+          var n = 0
+          while($("#conf_{{ role }}_"+n).length) {n++;}
+          newReRun = '<div class="conf_{{ role }}_' + n + '" id="conf_{{ role }}_' + n + '"> \
+           <h5> rerun: </h5> </div>' + 
+           '{% apply squeeze %}{% include drop_options.html %}{% end %}'.replace(/\d/g,n)  
+        $('.spoiler_{{ role }}').append(newReRun);  
+        }); 
+        </script>
+        </div>
       {% end %} 
     {% end %} 
   </div>  
 </div>
 
 <script type="text/javascript">
-  function delete_field(field){
-    alert(field)
-  } 
+    function sendParams(e, newParams) {
+        e.preventDefault();
+        $.ajax({
+            type: 'POST',
+            url: "/run",
+            data: JSON.stringify(newParams),
+            success: function (data) {
+                return false
+            }
+        });      
+    }
+
+    $("#runPlan").click(function (e) {
+      var newParams = {'func': $("#func").val()}
+      if (newParams['func'] == '0') {newParams['func']='smoke'}
+      else if (newParams['func'] == '-1') {newParams['func']='cloud'} 
+      {% for role in roles %}
+        if ($("#{{ role }}").is(':checked')) {
+          newParams['{{ role }}'] = []
+          var i = 0
+          while($("#conf_yabs_"+i).length) { 
+            if (i == 0) {
+              newParams['{{ role }}'].push({'run': {}})
+            } else if (i == 1) {
+              newParams['{{ role }}'][0]['rerun'] = {}
+            } else {
+              newParams['{{ role }}'].push({'rerun': {}})
+            }
+            {% for field in run_fields %}
+              if ($("#{{ role }}_{{ field }}_"+i).length) {
+                var value=''
+                {% if field == 'debug_cookie' %}
+                  value = $("#{{ role }}_{{ field }}_"+i).is(':checked')
+                {% else %}
+                  value = $("#{{ role }}_{{ field }}_"+i).val()
+                  if ('{{ field }}' == 'stand' && value == '0') { value = 'smoke' }
+                  else if ('{{ field }}' == 'stand' && value == '-1') { value = 'cloud' }  
+                {% end %}
+
+                if (i == 0) {
+                  newParams['{{ role }}'][i]['run']['{{ field }}'] = value
+                } else {
+                  newParams['{{ role }}'][i-1]['rerun']['{{ field }}'] = value
+                }  
+              }
+              
+            {% end %}
+            i++;
+          }
+        }
+      {% end %}
+      sendParams(e, newParams)
+    });  
 </script>
 
 </body>
