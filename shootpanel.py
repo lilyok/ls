@@ -29,7 +29,7 @@ class ShootHandler(tornado.web.RequestHandler):
             f.write( yaml.safe_dump(tornado.escape.json_decode(self.request.body), allow_unicode=True) )
 
             subprocess.call(["ls", "-l"])
-            # subprocess.call(["auto_b2b.py", "-c custom.conf"])
+            # subprocess.call(["python", "auto_b2b.py", "-c", "custom.conf"])
 
 
 
