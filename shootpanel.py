@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 __author__ = 'lilil'
+import threading
 import tornado.ioloop
 import tornado.web
 from tornado import template
@@ -11,7 +12,7 @@ import re
 import zlib
 import json
 import yaml
-import subprocess
+#import subprocess
 from subprocess import Popen, PIPE
 
 try:
@@ -27,10 +28,10 @@ class ShootHandler(tornado.web.RequestHandler):
     def post(self):
         with open("custom.conf", 'w') as f:
             f.write( yaml.safe_dump(tornado.escape.json_decode(self.request.body), allow_unicode=True) )
-
-            subprocess.call(["ls", "-l"])
-            # subprocess.call(["python", "auto_b2b.py", "-c", "custom.conf"])
-
+#            os.chdir("..")
+            #subprocess.call(["ls", "-l"])
+ #       threading.Thread(target=subprocess.call(["python", "auto_b2b.py", "-c", "custom.conf"]))
+        Popen("python auto_b2b.py -c custom.conf",  shell=True)
 
 
 class MongoHandler(tornado.web.RequestHandler):
@@ -86,8 +87,8 @@ class Application(tornado.web.Application):
         ]
         settings = {
             "debug": True,
-            "template_path": os.path.join(os.path.dirname(__file__), "tpl"),
-            "static_path": os.path.join(os.path.dirname(__file__),"static")
+            "template_path": os.path.join(os.path.dirname(__file__), "lil-shooter/tpl"),
+            "static_path": os.path.join(os.path.dirname(__file__),"lil-shooter/static")
         }
         tornado.web.Application.__init__(self, handlers, **settings)
 
@@ -95,5 +96,5 @@ class Application(tornado.web.Application):
 application = Application() 
 
 if __name__ == "__main__":
-        application.listen(8888)
+        application.listen(8089)
         tornado.ioloop.IOLoop.instance().start()
